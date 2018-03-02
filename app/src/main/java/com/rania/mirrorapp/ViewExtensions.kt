@@ -1,4 +1,4 @@
-package com.rania.mirrorapp.bdays
+package com.rania.mirrorapp
 
 import android.support.annotation.LayoutRes
 import android.view.LayoutInflater

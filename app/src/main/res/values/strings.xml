@@ -3,4 +3,5 @@
     <string name="action_settings">Settings</string>
     <string name="personality_card_msg">Personality card: %1$s</string>
     <string name="relationship_card_msg">Relationship card: %1$s</string>
+    <string name="enter_birthday_msg">Enter birthday</string>
 </resources>

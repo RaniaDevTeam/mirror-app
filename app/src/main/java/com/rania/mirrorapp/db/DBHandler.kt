@@ -5,7 +5,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import com.rania.mirrorapp.model.BirthdayModel
+import com.rania.mirrorapp.model.EntryModel
 import com.rania.mirrorapp.model.DBContract.BirthdayContract
 import com.rania.mirrorapp.model.Priority
 import java.util.LinkedList
@@ -43,7 +43,7 @@ class DBHandler(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_
     }
 
     @Throws(SQLiteConstraintException::class)
-    fun insertBirthdayEntry(entry: BirthdayModel): Boolean {
+    fun insertEntry(entry: EntryModel): Boolean {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(BirthdayContract.COLUMN_PERSON_NAME, entry.nameOfPerson)
@@ -57,32 +57,32 @@ class DBHandler(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_
         return -1L != db.insert(BirthdayContract.TABLE_NAME, null, values)
     }
 
-    fun retrieveAll(): Array<LinkedList<BirthdayModel>> {
+    fun getAll(): Array<LinkedList<EntryModel>> {
         val result = Array(Priority.values().size) {
-            LinkedList<BirthdayModel>()
+            LinkedList<EntryModel>()
         }
 
         val db = readableDatabase
-        val cursor = db.rawQuery(SQL_SELECT_ALL, null)
+        db.rawQuery(SQL_SELECT_ALL, null).use {
+            if (it.moveToFirst()) {
+                do {
+                    val priority = it.getIntFor(BirthdayContract.COLUMN_PRIORITY)
+                    result[priority].add(
+                            EntryModel.Builder()
+                                    .withNameOfPerson(
+                                            it.getStringFor(BirthdayContract.COLUMN_PERSON_NAME))
+                                    .withPriority(
+                                            Priority.from(priority))
+                                    .withDayOfMonth(
+                                            it.getIntFor(BirthdayContract.COLUMN_DAY_OF_MONTH))
+                                    .withMonth(
+                                            it.getIntFor(BirthdayContract.COLUMN_MONTH))
+                                    .withYear(
+                                            it.getIntFor(BirthdayContract.COLUMN_YEAR))
+                                    .build())
+                } while (it.moveToNext())
 
-        if (cursor.moveToFirst()) {
-            do {
-                val priority = cursor.getIntFor(BirthdayContract.COLUMN_PRIORITY)
-                result[priority].add(
-                        BirthdayModel.Builder()
-                                .withNameOfPerson(
-                                        cursor.getStringFor(BirthdayContract.COLUMN_PERSON_NAME))
-                                .withPriority(
-                                        Priority.from(priority))
-                                .withDayOfMonth(
-                                        cursor.getIntFor(BirthdayContract.COLUMN_DAY_OF_MONTH))
-                                .withMonth(
-                                        cursor.getIntFor(BirthdayContract.COLUMN_MONTH))
-                                .withYear(
-                                        cursor.getIntFor(BirthdayContract.COLUMN_YEAR))
-                                .build())
-            } while (cursor.moveToNext())
-
+            }
         }
         return result
     }

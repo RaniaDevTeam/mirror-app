@@ -3,9 +3,9 @@ package com.rania.mirrorapp.model
 /**
  * Created by Admin on 17.2.2018..
  */
-class BirthdayModel private constructor() {
+class EntryModel private constructor() {
     class Builder {
-        val model = BirthdayModel()
+        val model = EntryModel()
         fun withNameOfPerson(nameOfPerson: String): Builder {
             model.nameOfPerson = nameOfPerson
             return this
@@ -30,7 +30,7 @@ class BirthdayModel private constructor() {
             return this
         }
 
-        fun build(): BirthdayModel {
+        fun build(): EntryModel {
             return model
         }
     }

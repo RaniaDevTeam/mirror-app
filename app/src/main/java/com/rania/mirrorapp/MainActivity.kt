@@ -1,15 +1,16 @@
 package com.rania.mirrorapp
 
+import android.app.DatePickerDialog
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.Menu
 import android.view.MenuItem
-import com.rania.mirrorapp.bdays.BirthdayEntryAdapter
+import android.widget.DatePicker
+import com.codetroopers.betterpickers.datepicker.DatePickerBuilder
 import com.rania.mirrorapp.db.DBHandler
-import com.rania.mirrorapp.model.BirthdayModel
+import com.rania.mirrorapp.model.EntryModel
 import com.rania.mirrorapp.model.Priority
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -17,7 +18,7 @@ import kotlinx.android.synthetic.main.content_main.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var linearLayoutManager: LinearLayoutManager
-    private lateinit var recyclerAdapter: BirthdayEntryAdapter
+    private lateinit var recyclerAdapter: EntryAdapter
 
     private val dbHandler = DBHandler(this)
 
@@ -29,8 +30,23 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Yeah, right.", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+            val dpb = DatePickerBuilder()
+                    .setFragmentManager(supportFragmentManager)
+                    .setStyleResId(R.style.BetterPickersDialogFragment_Light)
+                    .addDatePickerDialogHandler({ _, year, month, day ->
+                        val entry = EntryModel.Builder()
+                                .withNameOfPerson("Random Person xxx")
+                                .withPriority(Priority.NORMAL)
+                                .withDayOfMonth(day)
+                                .withMonth(month + 1)
+                                .withYear(year)
+                                .build()
+                        dbHandler.insertEntry(entry)
+                        recyclerAdapter.dataset.add(entry)
+                        recyclerAdapter.notifyDataSetChanged()
+                    })
+                    .setYearOptional(false)
+            dpb.show()
         }
     }
 
@@ -57,7 +73,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupRecyclerAdapter(recyclerView: RecyclerView) {
         dbHandler.cleanUp()
-        dbHandler.insertBirthdayEntry(BirthdayModel.Builder()
+        dbHandler.insertEntry(EntryModel.Builder()
                 .withNameOfPerson("Tibor")
                 .withPriority(Priority.APP_USER)
                 .withDayOfMonth(6)
@@ -65,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 .withYear(1980)
                 .build()
         )
-        dbHandler.insertBirthdayEntry(BirthdayModel.Builder()
+        dbHandler.insertEntry(EntryModel.Builder()
                 .withNameOfPerson("Blanka")
                 .withPriority(Priority.FAVORITE)
                 .withDayOfMonth(10)
@@ -73,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                 .withYear(1977)
                 .build()
         )
-        dbHandler.insertBirthdayEntry(BirthdayModel.Builder()
+        dbHandler.insertEntry(EntryModel.Builder()
                 .withNameOfPerson("Random Person 1")
                 .withPriority(Priority.NORMAL)
                 .withDayOfMonth(5)
@@ -81,7 +97,7 @@ class MainActivity : AppCompatActivity() {
                 .withYear(1980)
                 .build()
         )
-        dbHandler.insertBirthdayEntry(BirthdayModel.Builder()
+        dbHandler.insertEntry(EntryModel.Builder()
                 .withNameOfPerson("Random Person 2")
                 .withPriority(Priority.NORMAL)
                 .withDayOfMonth(25)
@@ -89,7 +105,7 @@ class MainActivity : AppCompatActivity() {
                 .withYear(1983)
                 .build()
         )
-        recyclerAdapter = BirthdayEntryAdapter(this, dbHandler.retrieveAll())
+        recyclerAdapter = EntryAdapter(this, dbHandler.getAll())
         recyclerView.adapter = recyclerAdapter
     }
 }
